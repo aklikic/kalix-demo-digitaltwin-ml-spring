@@ -1,6 +1,5 @@
 package com.example.digitaltwin;
 
-import com.example.digitaltwin.api.CreateRequest;
 import com.example.digitaltwin.api.DigitalTwinApi;
 import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.springsdk.testkit.KalixIntegrationTestKitSupport;
@@ -39,7 +38,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         ResponseEntity<DigitalTwinApi.EmptyResponse> emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/create")
-                .bodyValue(new CreateRequest("name"))
+                .bodyValue(new DigitalTwinApi.CreateRequest("name"))
                 .retrieve()
                 .toEntity(DigitalTwinApi.EmptyResponse.class)
                 .block(timeout);
@@ -47,7 +46,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
 
         DigitalTwinApi.GetResponse getRes =
-        webClient.post()
+        webClient.get()
                 .uri("/dt/"+dtId)
                 .retrieve()
                 .bodyToMono(DigitalTwinApi.GetResponse.class)
@@ -66,7 +65,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
 
         getRes =
-        webClient.post()
+        webClient.get()
                 .uri("/dt/"+dtId)
                 .retrieve()
                 .bodyToMono(DigitalTwinApi.GetResponse.class)
@@ -85,7 +84,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
 
         getRes =
-        webClient.post()
+        webClient.get()
                 .uri("/dt/"+dtId)
                 .retrieve()
                 .bodyToMono(DigitalTwinApi.GetResponse.class)

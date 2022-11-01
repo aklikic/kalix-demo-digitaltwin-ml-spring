@@ -12,6 +12,7 @@ import kalix.springsdk.annotations.EventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.Instant;
@@ -41,7 +42,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
 
 
     @PostMapping("/create")
-    public Effect<DigitalTwinApi.EmptyResponse> create(CreateRequest request){
+    public Effect<DigitalTwinApi.EmptyResponse> create(@RequestBody DigitalTwinApi.CreateRequest request){
         if(this.currentState().isEmpty()){
             DigitalTwinEvent.Created event = new DigitalTwinEvent.Created(dtId, request.getName(),Instant.now());
             return effects().emitEvent(event).thenReply(newState -> DigitalTwinApi.EmptyResponse.of());
@@ -51,7 +52,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
     }
 
     @PostMapping("/metric")
-    public Effect<DigitalTwinApi.EmptyResponse> metric(DigitalTwinApi.MetricRequest request){
+    public Effect<DigitalTwinApi.EmptyResponse> metric(@RequestBody DigitalTwinApi.MetricRequest request){
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         }else if (!currentState().isMaintenanceRequired()){
@@ -68,7 +69,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
     }
 
     @PostMapping("/set-maintenance-performed")
-    public Effect<DigitalTwinApi.EmptyResponse> setMaintenancePerformed(DigitalTwinApi.SetMaintenancePerformedRequest request){
+    public Effect<DigitalTwinApi.EmptyResponse> setMaintenancePerformed(){
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         }else if (currentState().isMaintenanceRequired()){
@@ -80,7 +81,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
     }
 
     @GetMapping
-    public Effect<DigitalTwinApi.GetResponse> get(DigitalTwinApi.GetRequest request){
+    public Effect<DigitalTwinApi.GetResponse> get(){
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         } else {

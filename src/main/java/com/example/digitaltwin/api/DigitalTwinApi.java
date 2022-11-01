@@ -8,24 +8,24 @@ import java.time.Instant;
 
 public interface DigitalTwinApi {
 
-//    class CreateRequest implements DigitalTwinApi{
-//        public final String name;
-//
-//        @JsonCreator
-//        public CreateRequest(@JsonProperty String name) {
-//            this.name = name;
-//        }
-//
-//        public String getName() {
-//            return name;
-//        }
-//    }
+    class CreateRequest implements DigitalTwinApi{
+        public final String name;
+
+        @JsonCreator
+        public CreateRequest(@JsonProperty String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
     class MetricRequest implements DigitalTwinApi{
         private final Double raw1;
         private final Double raw2;
 
         @JsonCreator
-        public MetricRequest(@JsonProperty Double raw1, @JsonProperty Double raw2) {
+        public MetricRequest(@JsonProperty("raw1") Double raw1, @JsonProperty("raw2") Double raw2) {
             this.raw1 = raw1;
             this.raw2 = raw2;
         }
@@ -38,26 +38,44 @@ public interface DigitalTwinApi {
             return raw2;
         }
     }
-    class SetMaintenancePerformedRequest implements DigitalTwinApi{}
     class EmptyResponse implements DigitalTwinApi{
+        public final String note;
+        @JsonCreator
+        public EmptyResponse(@JsonProperty String note) {
+            this.note = note;
+        }
+        @JsonCreator
+        public EmptyResponse() {
+            this.note = "OK";
+        }
+
+        public String getNote() {
+            return note;
+        }
+
         public static EmptyResponse of(){
-            return new EmptyResponse();
+            return new EmptyResponse("OK");
         }
     }
 
-    class GetRequest implements DigitalTwinApi{}
 
     class GetResponse implements DigitalTwinApi{
-        private final String name;
-        private final boolean maintenanceRequired;
-        private final Instant lastUpdated;
+        public final String name;
+        public final boolean maintenanceRequired;
+        public final Instant lastUpdated;
 
         @JsonCreator
-        public GetResponse(@JsonProperty String name, @JsonProperty boolean maintenanceRequired, @JsonProperty Instant lastUpdated) {
+        public GetResponse(@JsonProperty("name") String name, @JsonProperty("maintenanceRequired") boolean maintenanceRequired, @JsonProperty("lastUpdated") Instant lastUpdated) {
             this.name = name;
             this.maintenanceRequired = maintenanceRequired;
             this.lastUpdated = lastUpdated;
         }
+        public GetResponse(){
+            this.name = null;
+            this.maintenanceRequired = false;
+            this.lastUpdated = null;
+        }
+
 
         public String getName() {
             return name;
