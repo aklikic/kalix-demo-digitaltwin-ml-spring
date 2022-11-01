@@ -28,7 +28,7 @@ public class DigitalTwinServiceTest {
 
         var dtId = UUID.randomUUID().toString();
 
-        EventSourcedTestKit<DigitalTwinState, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId,context -> new DigitalTwinService(context));
+        EventSourcedTestKit<DigitalTwinState, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId,context -> new DigitalTwinService(context,mlScoringService));
 
         var createRequest = new DigitalTwinApi.CreateRequest("name");
         EventSourcedResult<DigitalTwinApi.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
