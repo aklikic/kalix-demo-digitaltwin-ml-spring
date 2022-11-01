@@ -304,13 +304,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>ai.h2o</groupId>
-      <artifactId>mojo-runtime</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/mojo2-runtime.jar</systemPath>
-    </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>

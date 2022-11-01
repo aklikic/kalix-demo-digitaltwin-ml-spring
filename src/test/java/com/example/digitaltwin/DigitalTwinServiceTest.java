@@ -5,7 +5,7 @@ import com.example.digitaltwin.api.DigitalTwinService;
 import com.example.digitaltwin.domain.DigitalTwinEvent;
 import com.example.digitaltwin.domain.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
-import com.example.digitaltwin.ml.MLScoringServiceH20;
+import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.javasdk.testkit.EventSourcedResult;
 import kalix.springsdk.testkit.EventSourcedTestKit;
 import org.junit.jupiter.api.Test;
@@ -23,16 +23,12 @@ public class DigitalTwinServiceTest {
         happyPath(new MLScoringServiceMock());
     }
 
-    @Test
-    public void happyPathH20()throws Exception{
-        happyPath(new MLScoringServiceH20());
-    }
 
     private void happyPath(MLScoringService mlScoringService){
 
         var dtId = UUID.randomUUID().toString();
 
-        EventSourcedTestKit<DigitalTwinState, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId,context -> new DigitalTwinService(context,mlScoringService));
+        EventSourcedTestKit<DigitalTwinState, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId,context -> new DigitalTwinService(context));
 
         var createRequest = new DigitalTwinApi.CreateRequest("name");
         EventSourcedResult<DigitalTwinApi.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));

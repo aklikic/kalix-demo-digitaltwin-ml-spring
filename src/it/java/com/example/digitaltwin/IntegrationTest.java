@@ -1,6 +1,7 @@
 package com.example.digitaltwin;
 
 import com.example.digitaltwin.api.DigitalTwinApi;
+import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.springsdk.testkit.KalixIntegrationTestKitSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

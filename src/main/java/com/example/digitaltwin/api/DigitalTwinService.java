@@ -8,6 +8,7 @@ import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import kalix.springsdk.annotations.Entity;
 import kalix.springsdk.annotations.EventHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,11 +20,12 @@ import java.time.Instant;
 public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
 
     private final String dtId;
-    private final MLScoringService mlScoringService;
 
-    public DigitalTwinService(EventSourcedEntityContext context, MLScoringService mlScoringService) {
+    @Autowired
+    private MLScoringService mlScoringService;
+
+    public DigitalTwinService(EventSourcedEntityContext context) {
         this.dtId = context.entityId();
-        this.mlScoringService = mlScoringService;
     }
 
     @Override
