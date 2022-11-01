@@ -23,8 +23,8 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
 
     private final String dtId;
 
-    //@Autowired
-    private final MLScoringService mlScoringService = new MLScoringServiceMock();
+    @Autowired
+    private MLScoringService mlScoringService;
 
     public DigitalTwinService(EventSourcedEntityContext context) {
         this.dtId = context.entityId();
