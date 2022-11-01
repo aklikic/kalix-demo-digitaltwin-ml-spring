@@ -1,0 +1,6 @@
+/.idea/
+/digitaltwinml.iml
+/target/
+dependency-reduced-pom.xml
+license.sig
+/lib/
