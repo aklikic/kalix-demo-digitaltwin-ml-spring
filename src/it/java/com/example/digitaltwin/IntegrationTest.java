@@ -1,5 +1,6 @@
 package com.example.digitaltwin;
 
+import com.example.digitaltwin.api.CreateRequest;
 import com.example.digitaltwin.api.DigitalTwinApi;
 import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.springsdk.testkit.KalixIntegrationTestKitSupport;
@@ -38,7 +39,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         ResponseEntity<DigitalTwinApi.EmptyResponse> emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/create")
-                .bodyValue(new DigitalTwinApi.CreateRequest("name"))
+                .bodyValue(new CreateRequest("name"))
                 .retrieve()
                 .toEntity(DigitalTwinApi.EmptyResponse.class)
                 .block(timeout);

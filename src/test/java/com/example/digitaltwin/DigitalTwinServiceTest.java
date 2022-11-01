@@ -1,5 +1,6 @@
 package com.example.digitaltwin;
 
+import com.example.digitaltwin.api.CreateRequest;
 import com.example.digitaltwin.api.DigitalTwinApi;
 import com.example.digitaltwin.api.DigitalTwinService;
 import com.example.digitaltwin.domain.DigitalTwinEvent;
@@ -30,7 +31,7 @@ public class DigitalTwinServiceTest {
 
         EventSourcedTestKit<DigitalTwinState, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId,context -> new DigitalTwinService(context));
 
-        var createRequest = new DigitalTwinApi.CreateRequest("name");
+        var createRequest = new CreateRequest("name");
         EventSourcedResult<DigitalTwinApi.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
         DigitalTwinEvent.Created createdEvent = createResult.getNextEventOfType(DigitalTwinEvent.Created.class);
         assertEquals(dtId,createdEvent.getDtId());

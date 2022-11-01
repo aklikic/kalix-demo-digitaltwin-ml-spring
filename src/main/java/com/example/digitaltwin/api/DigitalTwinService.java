@@ -3,6 +3,7 @@ package com.example.digitaltwin.api;
 import com.example.digitaltwin.domain.DigitalTwinEvent;
 import com.example.digitaltwin.domain.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
+import com.example.digitaltwin.ml.MLScoringServiceMock;
 import io.grpc.Status;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
@@ -21,12 +22,17 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
 
     private final String dtId;
 
-    @Autowired
-    private MLScoringService mlScoringService;
+    //@Autowired
+    private final MLScoringService mlScoringService = new MLScoringServiceMock();
 
     public DigitalTwinService(EventSourcedEntityContext context) {
         this.dtId = context.entityId();
     }
+
+//    public DigitalTwinService(EventSourcedEntityContext context,MLScoringService mlScoringService) {
+//        this.dtId = context.entityId();
+//        this.mlScoringService = mlScoringService;
+//    }
 
     @Override
     public DigitalTwinState emptyState() {
@@ -35,7 +41,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
 
 
     @PostMapping("/create")
-    public Effect<DigitalTwinApi.EmptyResponse> create(DigitalTwinApi.CreateRequest request){
+    public Effect<DigitalTwinApi.EmptyResponse> create(CreateRequest request){
         if(this.currentState().isEmpty()){
             DigitalTwinEvent.Created event = new DigitalTwinEvent.Created(dtId, request.getName(),Instant.now());
             return effects().emitEvent(event).thenReply(newState -> DigitalTwinApi.EmptyResponse.of());

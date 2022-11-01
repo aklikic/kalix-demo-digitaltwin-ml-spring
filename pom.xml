@@ -305,12 +305,15 @@
     </dependency>
 
 
+    <!--
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.24</version>
-      <scope>provided</scope>
+      <groupId>ai.h2o</groupId>
+      <artifactId>mojo-runtime</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/mojo2-runtime.jar</systemPath>
     </dependency>
+-->
 
   </dependencies>
 </project>

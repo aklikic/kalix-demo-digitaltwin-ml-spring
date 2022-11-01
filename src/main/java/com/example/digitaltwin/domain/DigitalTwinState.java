@@ -1,14 +1,34 @@
 package com.example.digitaltwin.domain;
 
-import lombok.Value;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
-@Value
 public class DigitalTwinState {
-    String name;
-    boolean maintenanceRequired;
-    Instant lastUpdated;
+    private final String name;
+    private final boolean maintenanceRequired;
+    private final Instant lastUpdated;
+
+    @JsonCreator
+    public DigitalTwinState(@JsonProperty String name, @JsonProperty boolean maintenanceRequired, @JsonProperty Instant lastUpdated) {
+        this.name = name;
+        this.maintenanceRequired = maintenanceRequired;
+        this.lastUpdated = lastUpdated;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isMaintenanceRequired() {
+        return maintenanceRequired;
+    }
+
+    public Instant getLastUpdated() {
+        return lastUpdated;
+    }
 
     public static DigitalTwinState empty(){
         return new DigitalTwinState(null,false,null);

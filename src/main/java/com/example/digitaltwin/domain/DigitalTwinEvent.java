@@ -1,8 +1,9 @@
 package com.example.digitaltwin.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Value;
 
 import java.time.Instant;
 
@@ -14,20 +15,66 @@ import java.time.Instant;
                 @JsonSubTypes.Type(value = DigitalTwinEvent.MaintenancePerformed.class, name = "maintenance-performed"),
         })
 public interface DigitalTwinEvent {
-    @Value
     class Created implements DigitalTwinEvent{
-        String dtId;
-        String name;
-        Instant timestamp;
+        private final String dtId;
+        private final String name;
+        private final Instant timestamp;
+
+        @JsonCreator
+        public Created(@JsonProperty String dtId, @JsonProperty String name, @JsonProperty Instant timestamp) {
+            this.dtId = dtId;
+            this.name = name;
+            this.timestamp = timestamp;
+        }
+
+        public String getDtId() {
+            return dtId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Instant getTimestamp() {
+            return timestamp;
+        }
     }
-    @Value
+
     class MaintenanceRequired implements DigitalTwinEvent{
-        String dtId;
-        Instant timestamp;
+        private final String dtId;
+        private final Instant timestamp;
+
+        @JsonCreator
+        public MaintenanceRequired(@JsonProperty String dtId, @JsonProperty Instant timestamp) {
+            this.dtId = dtId;
+            this.timestamp = timestamp;
+        }
+
+        public String getDtId() {
+            return dtId;
+        }
+
+        public Instant getTimestamp() {
+            return timestamp;
+        }
     }
-    @Value
+
     class MaintenancePerformed implements DigitalTwinEvent{
-        String dtId;
-        Instant timestamp;
+        private final String dtId;
+        private final Instant timestamp;
+
+        @JsonCreator
+        public MaintenancePerformed(@JsonProperty String dtId, @JsonProperty Instant timestamp) {
+            this.dtId = dtId;
+            this.timestamp = timestamp;
+        }
+
+        public String getDtId() {
+            return dtId;
+        }
+
+        public Instant getTimestamp() {
+            return timestamp;
+        }
     }
 }
