@@ -5,7 +5,6 @@ import com.example.digitaltwin.api.DigitalTwinService;
 import com.example.digitaltwin.domain.DigitalTwinEvent;
 import com.example.digitaltwin.domain.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
-import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.javasdk.testkit.EventSourcedResult;
 import kalix.springsdk.testkit.EventSourcedTestKit;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,6 @@
 package com.example.digitaltwin;
 
 import com.example.digitaltwin.api.DigitalTwinApi;
-import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.springsdk.testkit.KalixIntegrationTestKitSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@Profile("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Main.class)
 public class IntegrationTest extends KalixIntegrationTestKitSupport {
@@ -33,6 +34,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
     @Test
     public void test() throws Exception {
+
         String dtId = UUID.randomUUID().toString();
 
         ResponseEntity<DigitalTwinApi.EmptyResponse> emptyRes =

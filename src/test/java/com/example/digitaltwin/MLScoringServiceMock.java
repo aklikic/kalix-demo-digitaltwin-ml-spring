@@ -1,9 +1,11 @@
-package com.example.digitaltwin.ml;
+package com.example.digitaltwin;
 
 import com.example.digitaltwin.api.DigitalTwinApi;
 import com.example.digitaltwin.ml.MLScoringService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("test")
 @Component
 public class MLScoringServiceMock implements MLScoringService {
 

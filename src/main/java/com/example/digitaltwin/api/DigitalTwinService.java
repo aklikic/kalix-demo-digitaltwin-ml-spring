@@ -3,7 +3,6 @@ package com.example.digitaltwin.api;
 import com.example.digitaltwin.domain.DigitalTwinEvent;
 import com.example.digitaltwin.domain.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
-import com.example.digitaltwin.ml.MLScoringServiceMock;
 import io.grpc.Status;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntityContext;
