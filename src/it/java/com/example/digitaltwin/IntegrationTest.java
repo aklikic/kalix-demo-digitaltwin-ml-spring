@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@Profile("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Main.class)
 public class IntegrationTest extends KalixIntegrationTestKitSupport {
@@ -91,6 +90,91 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .retrieve()
                 .bodyToMono(DigitalTwinApi.GetResponse.class)
                 .block(timeout);
+
+        assertTrue(getRes.isMaintenanceRequired());
+
+    }
+
+    @Test
+    public void testWithAggregation() throws Exception {
+
+        String dtId = UUID.randomUUID().toString();
+
+        ResponseEntity<DigitalTwinApi.EmptyResponse> emptyRes =
+                webClient.post()
+                        .uri("/dt/"+dtId+"/create")
+                        .bodyValue(new DigitalTwinApi.CreateRequest("name"))
+                        .retrieve()
+                        .toEntity(DigitalTwinApi.EmptyResponse.class)
+                        .block(timeout);
+
+        assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
+
+        DigitalTwinApi.GetResponse getRes =
+                webClient.get()
+                        .uri("/dt/"+dtId)
+                        .retrieve()
+                        .bodyToMono(DigitalTwinApi.GetResponse.class)
+                        .block(timeout);
+
+        assertFalse(getRes.isMaintenanceRequired());
+
+        emptyRes =
+                webClient.post()
+                        .uri("/dt/"+dtId+"//aggregation/metric-raw-1")
+                        .bodyValue(MLScoringServiceMock.metricRaw1OKRequest)
+                        .retrieve()
+                        .toEntity(DigitalTwinApi.EmptyResponse.class)
+                        .block(timeout);
+
+        assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
+
+        emptyRes =
+                webClient.post()
+                        .uri("/dt/"+dtId+"//aggregation/metric-raw-2")
+                        .bodyValue(MLScoringServiceMock.metricRaw2OKRequest)
+                        .retrieve()
+                        .toEntity(DigitalTwinApi.EmptyResponse.class)
+                        .block(timeout);
+
+        assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
+
+        getRes =
+                webClient.get()
+                        .uri("/dt/"+dtId)
+                        .retrieve()
+                        .bodyToMono(DigitalTwinApi.GetResponse.class)
+                        .block(timeout);
+
+        assertFalse(getRes.isMaintenanceRequired());
+
+
+        emptyRes =
+                webClient.post()
+                        .uri("/dt/"+dtId+"//aggregation/metric-raw-1")
+                        .bodyValue(MLScoringServiceMock.metricRaw1FailRequest)
+                        .retrieve()
+                        .toEntity(DigitalTwinApi.EmptyResponse.class)
+                        .block(timeout);
+
+        assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
+
+        emptyRes =
+                webClient.post()
+                        .uri("/dt/"+dtId+"//aggregation/metric-raw-2")
+                        .bodyValue(MLScoringServiceMock.metricRaw2FailRequest)
+                        .retrieve()
+                        .toEntity(DigitalTwinApi.EmptyResponse.class)
+                        .block(timeout);
+
+        assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
+
+        getRes =
+                webClient.get()
+                        .uri("/dt/"+dtId)
+                        .retrieve()
+                        .bodyToMono(DigitalTwinApi.GetResponse.class)
+                        .block(timeout);
 
         assertTrue(getRes.isMaintenanceRequired());
 

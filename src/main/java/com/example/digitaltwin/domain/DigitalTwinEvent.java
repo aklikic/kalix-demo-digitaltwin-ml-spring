@@ -7,13 +7,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.Instant;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes(
-        {
-                @JsonSubTypes.Type(value = DigitalTwinEvent.Created.class, name = "created"),
-                @JsonSubTypes.Type(value = DigitalTwinEvent.MaintenanceRequired.class, name = "maintenance-required"),
-                @JsonSubTypes.Type(value = DigitalTwinEvent.MaintenancePerformed.class, name = "maintenance-performed"),
-        })
 public interface DigitalTwinEvent {
     class Created implements DigitalTwinEvent{
         private final String dtId;
@@ -40,6 +33,62 @@ public interface DigitalTwinEvent {
         }
     }
 
+    class MetricRaw1Received extends MetricRawReceived{
+        @JsonCreator
+        public MetricRaw1Received(@JsonProperty String dtId, @JsonProperty Double raw, @JsonProperty Instant timestamp) {
+            super(dtId, raw, timestamp);
+        }
+    }
+
+    class MetricRaw2Received extends MetricRawReceived{
+        @JsonCreator
+        public MetricRaw2Received(@JsonProperty String dtId, @JsonProperty Double raw, @JsonProperty Instant timestamp) {
+            super(dtId, raw, timestamp);
+        }
+    }
+
+    class MetricRawReceived implements DigitalTwinEvent{
+        private final String dtId;
+        private final Double raw;
+        private final Instant timestamp;
+
+        public MetricRawReceived(String dtId,Double raw,Instant timestamp) {
+            this.dtId = dtId;
+            this.raw = raw;
+            this.timestamp = timestamp;
+        }
+
+        public String getDtId() {
+            return dtId;
+        }
+
+        public Double getRaw() {
+            return raw;
+        }
+
+        public Instant getTimestamp() {
+            return timestamp;
+        }
+    }
+
+    class MaintenanceNotRequired implements DigitalTwinEvent{
+        private final String dtId;
+        private final Instant timestamp;
+
+        @JsonCreator
+        public MaintenanceNotRequired(@JsonProperty String dtId, @JsonProperty Instant timestamp) {
+            this.dtId = dtId;
+            this.timestamp = timestamp;
+        }
+
+        public String getDtId() {
+            return dtId;
+        }
+
+        public Instant getTimestamp() {
+            return timestamp;
+        }
+    }
     class MaintenanceRequired implements DigitalTwinEvent{
         private final String dtId;
         private final Instant timestamp;

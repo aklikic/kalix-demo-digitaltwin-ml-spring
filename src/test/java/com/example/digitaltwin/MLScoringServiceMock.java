@@ -5,12 +5,17 @@ import com.example.digitaltwin.ml.MLScoringService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Profile("test")
 @Component
 public class MLScoringServiceMock implements MLScoringService {
 
     public static final DigitalTwinApi.MetricRequest metricOKRequest = new DigitalTwinApi.MetricRequest(0.92d,0.328501935d);
     public static final DigitalTwinApi.MetricRequest metricFailRequest = new DigitalTwinApi.MetricRequest(0.72d,0.002764904d);
+
+    public static final DigitalTwinApi.MetricRawRequest metricRaw1OKRequest = new DigitalTwinApi.MetricRawRequest(0.92d);
+    public static final DigitalTwinApi.MetricRawRequest metricRaw2OKRequest = new DigitalTwinApi.MetricRawRequest(0.328501935d);
+
+    public static final DigitalTwinApi.MetricRawRequest metricRaw1FailRequest = new DigitalTwinApi.MetricRawRequest(0.72d);
+    public static final DigitalTwinApi.MetricRawRequest metricRaw2FailRequest = new DigitalTwinApi.MetricRawRequest(0.002764904d);
 
     @Override
     public boolean scoreIfMaintenanceRequired(Double raw1, Double raw2) {

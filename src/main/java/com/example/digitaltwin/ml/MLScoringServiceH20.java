@@ -2,6 +2,9 @@ package com.example.digitaltwin.ml;
 
 import ai.h2o.mojos.runtime.MojoPipeline;
 import ai.h2o.mojos.runtime.api.MojoPipelineService;
+import ai.h2o.mojos.runtime.api.backend.DirReaderBackend;
+import ai.h2o.mojos.runtime.api.backend.ReaderBackend;
+import ai.h2o.mojos.runtime.api.backend.ZipFileReaderBackend;
 import ai.h2o.mojos.runtime.frame.MojoFrame;
 import ai.h2o.mojos.runtime.frame.MojoFrameBuilder;
 import ai.h2o.mojos.runtime.frame.MojoRowBuilder;
@@ -10,18 +13,28 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-@Component
+//@Component
 public class MLScoringServiceH20 implements MLScoringService{
 
     private final MojoPipeline model;
 
-
     public MLScoringServiceH20() throws IOException, LicenseException {
         model = MojoPipelineService.loadPipeline(getFile("pipeline.mojo"));
+//        String path = getFile("pipeline.mojo").getPath();
+//        System.out.println("path: "+path);
+//        byte [] data = Files.readAllBytes(Paths.get(path));
+//        System.out.println("mojo: "+data.length);
+//
+//        model = MojoPipelineService.loadPipeline(new ByteArrayReaderBackend(data));
     }
+
 
     private File getFile(String fileName) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();

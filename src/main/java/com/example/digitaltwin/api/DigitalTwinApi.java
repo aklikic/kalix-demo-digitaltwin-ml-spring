@@ -38,6 +38,18 @@ public interface DigitalTwinApi {
             return raw2;
         }
     }
+    class MetricRawRequest implements DigitalTwinApi{
+        private final Double raw;
+
+        @JsonCreator
+        public MetricRawRequest(@JsonProperty("raw") Double raw) {
+            this.raw = raw;
+        }
+
+        public Double getRaw() {
+            return raw;
+        }
+    }
     class EmptyResponse implements DigitalTwinApi{
         public final String note;
         @JsonCreator
