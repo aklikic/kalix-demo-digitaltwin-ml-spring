@@ -1,4 +1,4 @@
-package com.example.digitaltwin.api;
+package com.example.digitaltwin.model;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -73,17 +73,23 @@ public interface DigitalTwinApi {
 
     class GetResponse implements DigitalTwinApi{
         public final String name;
+        public final Double raw1;
+        public final Double raw2;
         public final boolean maintenanceRequired;
         public final Instant lastUpdated;
 
         @JsonCreator
-        public GetResponse(@JsonProperty("name") String name, @JsonProperty("maintenanceRequired") boolean maintenanceRequired, @JsonProperty("lastUpdated") Instant lastUpdated) {
+        public GetResponse(@JsonProperty("name") String name,@JsonProperty("raw1")Double raw1,@JsonProperty("raw2")Double raw2, @JsonProperty("maintenanceRequired") boolean maintenanceRequired, @JsonProperty("lastUpdated") Instant lastUpdated) {
             this.name = name;
+            this.raw1 = raw1;
+            this.raw2 = raw2;
             this.maintenanceRequired = maintenanceRequired;
             this.lastUpdated = lastUpdated;
         }
         public GetResponse(){
             this.name = null;
+            this.raw1 = null;
+            this.raw2 = null;
             this.maintenanceRequired = false;
             this.lastUpdated = null;
         }
@@ -91,6 +97,14 @@ public interface DigitalTwinApi {
 
         public String getName() {
             return name;
+        }
+
+        public Double getRaw2() {
+            return raw2;
+        }
+
+        public Double getRaw1() {
+            return raw1;
         }
 
         public boolean isMaintenanceRequired() {

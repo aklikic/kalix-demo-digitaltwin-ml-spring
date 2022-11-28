@@ -1,7 +1,8 @@
 package com.example.digitaltwin.api;
 
-import com.example.digitaltwin.domain.DigitalTwinEvent;
-import com.example.digitaltwin.domain.DigitalTwinState;
+import com.example.digitaltwin.model.DigitalTwinApi;
+import com.example.digitaltwin.model.DigitalTwinEvent;
+import com.example.digitaltwin.model.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
 import io.grpc.Status;
 import kalix.javasdk.eventsourcedentity.EventSourcedEntity;
@@ -18,14 +19,14 @@ import java.time.Instant;
 
 @Entity(entityKey = "dtId", entityType = "digitaltwin")
 @RequestMapping("/dt/{dtId}")
-public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
+public class DigitalTwinController extends EventSourcedEntity<DigitalTwinState> {
 
     private final String dtId;
 
     private final MLScoringService mlScoringService;
 
     @Autowired
-    public DigitalTwinService(EventSourcedEntityContext context,MLScoringService mlScoringService) {
+    public DigitalTwinController(EventSourcedEntityContext context, MLScoringService mlScoringService) {
         this.dtId = context.entityId();
         this.mlScoringService = mlScoringService;
     }
@@ -53,7 +54,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
         }else if (!currentState().isMaintenanceRequired()){
             boolean maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(request.getRaw1(), request.getRaw2());
             if(maintenanceRequired){
-                DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,Instant.now());
+                DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,request.getRaw1(), request.getRaw2(),Instant.now());
                 return effects().emitEvent(event).thenReply(newState -> DigitalTwinApi.EmptyResponse.of());
             } else {
                 return effects().reply(DigitalTwinApi.EmptyResponse.of());
@@ -80,7 +81,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
                 //if raw2 was already received we can trigger maintenanceRequired check
                 boolean maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(request.getRaw(), currentState().getRaw2());
                 if(maintenanceRequired){
-                    DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,Instant.now());
+                    DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,request.getRaw(), currentState().getRaw2(),Instant.now());
                     return effects().emitEvent(event).thenReply(newState -> DigitalTwinApi.EmptyResponse.of());
                 } else {
                     DigitalTwinEvent.MaintenanceNotRequired event = new DigitalTwinEvent.MaintenanceNotRequired(dtId,Instant.now());
@@ -108,7 +109,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
                 //if raw1 was already received we can trigger maintenanceRequired check
                 boolean maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(currentState().getRaw1(), request.getRaw());
                 if(maintenanceRequired){
-                    DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,Instant.now());
+                    DigitalTwinEvent.MaintenanceRequired event = new DigitalTwinEvent.MaintenanceRequired(dtId,currentState().getRaw1(), request.getRaw(),Instant.now());
                     return effects().emitEvent(event).thenReply(newState -> DigitalTwinApi.EmptyResponse.of());
                 } else {
                     DigitalTwinEvent.MaintenanceNotRequired event = new DigitalTwinEvent.MaintenanceNotRequired(dtId,Instant.now());
@@ -137,7 +138,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinState> {
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         } else {
-            return effects().reply(new DigitalTwinApi.GetResponse(this.currentState().getName(),this.currentState().isMaintenanceRequired(),this.currentState().getLastUpdated()));
+            return effects().reply(new DigitalTwinApi.GetResponse(this.currentState().getName(),this.currentState().getRaw1(), this.currentState().getRaw2(),this.currentState().isMaintenanceRequired(),this.currentState().getLastUpdated()));
         }
     }
 

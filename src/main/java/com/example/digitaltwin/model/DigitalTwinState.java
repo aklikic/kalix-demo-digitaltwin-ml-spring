@@ -1,4 +1,4 @@
-package com.example.digitaltwin.domain;
+package com.example.digitaltwin.model;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -70,7 +70,7 @@ public class DigitalTwinState {
         return new DigitalTwinState(this.getName(), this.getRaw1(), event.getRaw(), false, event.getTimestamp());
     }
     public DigitalTwinState onMaintenanceRequired(DigitalTwinEvent.MaintenanceRequired event){
-        return new DigitalTwinState(this.getName(), null,null,true, event.getTimestamp());
+        return new DigitalTwinState(this.getName(), event.getRaw1(),event.getRaw2(),true, event.getTimestamp());
     }
     public DigitalTwinState onMaintenanceNotRequired(DigitalTwinEvent.MaintenanceNotRequired event){
         return new DigitalTwinState(this.getName(), null,null,false, event.getTimestamp());

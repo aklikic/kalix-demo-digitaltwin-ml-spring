@@ -1,6 +1,7 @@
 package com.example.digitaltwin;
 
-import com.example.digitaltwin.api.DigitalTwinApi;
+import com.example.digitaltwin.model.DigitalTwinApi;
+import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.springsdk.testkit.KalixIntegrationTestKitSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -151,7 +151,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
         emptyRes =
                 webClient.post()
-                        .uri("/dt/"+dtId+"//aggregation/metric-raw-1")
+                        .uri("/dt/"+dtId+"/aggregation/metric-raw-1")
                         .bodyValue(MLScoringServiceMock.metricRaw1FailRequest)
                         .retrieve()
                         .toEntity(DigitalTwinApi.EmptyResponse.class)
@@ -161,7 +161,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
         emptyRes =
                 webClient.post()
-                        .uri("/dt/"+dtId+"//aggregation/metric-raw-2")
+                        .uri("/dt/"+dtId+"/aggregation/metric-raw-2")
                         .bodyValue(MLScoringServiceMock.metricRaw2FailRequest)
                         .retrieve()
                         .toEntity(DigitalTwinApi.EmptyResponse.class)
@@ -177,6 +177,8 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                         .block(timeout);
 
         assertTrue(getRes.isMaintenanceRequired());
+        assertEquals(MLScoringServiceMock.metricRaw1FailRequest.getRaw(),getRes.getRaw1());
+        assertEquals(MLScoringServiceMock.metricRaw2FailRequest.getRaw(),getRes.getRaw2());
 
     }
 }

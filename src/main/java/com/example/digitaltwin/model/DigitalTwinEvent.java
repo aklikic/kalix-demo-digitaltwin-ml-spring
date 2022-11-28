@@ -1,9 +1,7 @@
-package com.example.digitaltwin.domain;
+package com.example.digitaltwin.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.Instant;
 
@@ -91,16 +89,28 @@ public interface DigitalTwinEvent {
     }
     class MaintenanceRequired implements DigitalTwinEvent{
         private final String dtId;
+        private final Double raw1;
+        private final Double raw2;
         private final Instant timestamp;
 
         @JsonCreator
-        public MaintenanceRequired(@JsonProperty String dtId, @JsonProperty Instant timestamp) {
+        public MaintenanceRequired(@JsonProperty String dtId, @JsonProperty Double raw1, @JsonProperty Double raw2, @JsonProperty Instant timestamp) {
             this.dtId = dtId;
+            this.raw1 = raw1;
+            this.raw2 = raw2;
             this.timestamp = timestamp;
         }
 
         public String getDtId() {
             return dtId;
+        }
+
+        public Double getRaw1() {
+            return raw1;
+        }
+
+        public Double getRaw2() {
+            return raw2;
         }
 
         public Instant getTimestamp() {

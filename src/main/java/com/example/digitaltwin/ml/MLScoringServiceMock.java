@@ -1,8 +1,6 @@
-package com.example.digitaltwin;
+package com.example.digitaltwin.ml;
 
-import com.example.digitaltwin.api.DigitalTwinApi;
-import com.example.digitaltwin.ml.MLScoringService;
-import org.springframework.context.annotation.Profile;
+import com.example.digitaltwin.model.DigitalTwinApi;
 import org.springframework.stereotype.Component;
 
 @Component
