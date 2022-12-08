@@ -3,7 +3,7 @@ package com.example.digitaltwin.ml;
 import com.example.digitaltwin.model.DigitalTwinApi;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class MLScoringServiceMock implements MLScoringService {
 
     public static final DigitalTwinApi.MetricRequest metricOKRequest = new DigitalTwinApi.MetricRequest(0.92d,0.328501935d);

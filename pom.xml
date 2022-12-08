@@ -124,10 +124,30 @@
                   <!-- expose port in Docker container -->
                   <port>8080</port>
                 </ports>
-                <assembly>
-                  <!-- NOTE: (optional) switch to "artifact-with-dependencies" to show dependencies library-->
-                  <descriptorRef>artifact</descriptorRef>
-                </assembly>
+                <assemblies>
+                  <assembly>
+                    <name>jar</name>
+                    <!-- NOTE: (optional) switch to "artifact-with-dependencies" to show dependencies library-->
+                    <descriptorRef>artifact</descriptorRef>
+                  </assembly>
+                  <!--
+                  <assembly>
+                    <name>mojo</name>
+                    <basedir>${project.build.directory}/classes</basedir>
+                    <inline>
+                      <files>
+                        <file>
+                          <source>pipeline.mojo</source>
+                        </file>
+                        <file>
+                          <source>license.sig</source>
+                        </file>
+                      </files>
+                    </inline>
+                  </assembly>
+                  -->
+                </assemblies>
+
                 <entryPoint>
                   <arg>java</arg>
                   <arg>-jar</arg>

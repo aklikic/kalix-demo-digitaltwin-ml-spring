@@ -121,7 +121,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
         emptyRes =
                 webClient.post()
-                        .uri("/dt/"+dtId+"//aggregation/metric-raw-1")
+                        .uri("/dt/"+dtId+"/aggregation/metric-raw-1")
                         .bodyValue(MLScoringServiceMock.metricRaw1OKRequest)
                         .retrieve()
                         .toEntity(DigitalTwinApi.EmptyResponse.class)
@@ -131,7 +131,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
         emptyRes =
                 webClient.post()
-                        .uri("/dt/"+dtId+"//aggregation/metric-raw-2")
+                        .uri("/dt/"+dtId+"/aggregation/metric-raw-2")
                         .bodyValue(MLScoringServiceMock.metricRaw2OKRequest)
                         .retrieve()
                         .toEntity(DigitalTwinApi.EmptyResponse.class)

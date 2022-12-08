@@ -25,7 +25,7 @@ public class DigitalTwinServiceTest {
         happyPath(new MLScoringServiceMock());
     }
 
-//    @Test
+    @Test
     public void happyPathH20()throws Exception{
         happyPath(new MLScoringServiceH20());
     }
@@ -34,7 +34,7 @@ public class DigitalTwinServiceTest {
     public void happyPathWithAggregationMock(){
         happyPathWithAggregation(new MLScoringServiceMock());
     }
-//    @Test
+    @Test
     public void happyPathWithAggregationH20()throws Exception{
         happyPathWithAggregation(new MLScoringServiceH20());
     }
