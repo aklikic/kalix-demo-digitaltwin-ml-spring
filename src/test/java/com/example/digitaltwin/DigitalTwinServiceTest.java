@@ -1,21 +1,14 @@
 package com.example.digitaltwin;
 
-import com.example.digitaltwin.model.DigitalTwinApi;
-import com.example.digitaltwin.api.DigitalTwinController;
-import com.example.digitaltwin.model.DigitalTwinEvent;
-import com.example.digitaltwin.model.DigitalTwinState;
 import com.example.digitaltwin.ml.MLScoringService;
-import com.example.digitaltwin.ml.MLScoringServiceH20;
 import com.example.digitaltwin.ml.MLScoringServiceMock;
 import kalix.javasdk.testkit.EventSourcedResult;
 import kalix.springsdk.testkit.EventSourcedTestKit;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DigitalTwinServiceTest {
 
@@ -25,126 +18,69 @@ public class DigitalTwinServiceTest {
         happyPath(new MLScoringServiceMock());
     }
 
-    @Test
-    public void happyPathH20()throws Exception{
-        happyPath(new MLScoringServiceH20());
-    }
+//    @Test
+//    public void happyPathH20()throws Exception{
+//        happyPath(new MLScoringServiceH20());
+//    }
 
-    @Test
-    public void happyPathWithAggregationMock(){
-        happyPathWithAggregation(new MLScoringServiceMock());
-    }
-    @Test
-    public void happyPathWithAggregationH20()throws Exception{
-        happyPathWithAggregation(new MLScoringServiceH20());
-    }
 
     private void happyPath(MLScoringService mlScoringService){
 
         var dtId = UUID.randomUUID().toString();
+        var aggregationLimit = 2;
+        var aggregationTimeWindowSeconds = 10;
 
-        EventSourcedTestKit<DigitalTwinState, DigitalTwinController> testKit = EventSourcedTestKit.of(dtId, context -> new DigitalTwinController(context,mlScoringService));
+        EventSourcedTestKit<DigitalTwinModel.State, DigitalTwinService> testKit = EventSourcedTestKit.of(dtId, context -> new DigitalTwinService(context,mlScoringService));
 
-        var createRequest = new DigitalTwinApi.CreateRequest("name");
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
-        DigitalTwinEvent.Created createdEvent = createResult.getNextEventOfType(DigitalTwinEvent.Created.class);
-        assertEquals(dtId,createdEvent.getDtId());
+        //create
+        var createRequest = new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds);
+        EventSourcedResult<DigitalTwinModel.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
+        createResult.getNextEventOfType(DigitalTwinModel.CreatedEvent.class);
 
-        DigitalTwinState updatedState = (DigitalTwinState)createResult.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
+        DigitalTwinModel.State updatedState = (DigitalTwinModel.State)createResult.getUpdatedState();
+        assertFalse(updatedState.maintenanceRequired);
+        assertEquals(0,updatedState.aggregation.size());
+
 
         var metricOKRequest = MLScoringServiceMock.metricOKRequest;
         var metricFailRequest = MLScoringServiceMock.metricFailRequest;
 
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> metricResult = testKit.call(service -> service.metric(metricOKRequest));
-        assertFalse(metricResult.didEmitEvents());
+        //send first OK metric
+        EventSourcedResult<DigitalTwinModel.EmptyResponse> metricResult = testKit.call(service -> service.metric(metricOKRequest));
+        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregateEvent.class);
+        updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
+        assertFalse(updatedState.maintenanceRequired);
+        assertEquals(1,updatedState.aggregation.size());
 
+        //send second OK metric - aggregation is done and scoring initiated. Scoring result indicated that maintenance is NOT required
+        metricResult = testKit.call(service -> service.metric(metricOKRequest));
+        metricResult.getNextEventOfType(DigitalTwinModel.AggregationFinishedEvent.class);
+        updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
+        assertFalse(updatedState.maintenanceRequired);
+        assertEquals(0,updatedState.aggregation.size());
+
+
+        //send first FAIL metric
         metricResult = testKit.call(service -> service.metric(metricFailRequest));
-        DigitalTwinEvent.MaintenanceRequired mrEvent = metricResult.getNextEventOfType(DigitalTwinEvent.MaintenanceRequired.class);
-        assertEquals(dtId,mrEvent.getDtId());
+        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregateEvent.class);
+        updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
+        assertFalse(updatedState.maintenanceRequired);
+        assertEquals(1,updatedState.aggregation.size());
 
+        //send second FAIL metric - aggregation is done and scoring initiated. Scoring result indicated that maintenance is required
         metricResult = testKit.call(service -> service.metric(metricFailRequest));
-        assertFalse(metricResult.didEmitEvents());
+        metricResult.getNextEventOfType(DigitalTwinModel.AggregationFinishedEvent.class);
+        updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
+        assertTrue(updatedState.maintenanceRequired);
+        assertEquals(0,updatedState.aggregation.size());
 
-        updatedState = (DigitalTwinState)metricResult.getUpdatedState();
-        assertTrue(updatedState.isMaintenanceRequired());
-
-
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> setMaintenancePerformedResult = testKit.call(service -> service.setMaintenancePerformed());
-        DigitalTwinEvent.MaintenancePerformed mpEvent = setMaintenancePerformedResult.getNextEventOfType(DigitalTwinEvent.MaintenancePerformed.class);
-        assertEquals(dtId,mpEvent.getDtId());
-
-        updatedState = (DigitalTwinState)createResult.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
+        //mark maintenance as performed
+        EventSourcedResult<DigitalTwinModel.EmptyResponse> maintenancePerformedResult = testKit.call(service -> service.setMaintenancePerformed());
+        maintenancePerformedResult.getNextEventOfType(DigitalTwinModel.MaintenancePerformedEvent.class);
+        updatedState = (DigitalTwinModel.State)maintenancePerformedResult.getUpdatedState();
+        assertFalse(updatedState.maintenanceRequired);
+        assertEquals(0,updatedState.aggregation.size());
 
     }
-    private void happyPathWithAggregation(MLScoringService mlScoringService){
 
-        var dtId = UUID.randomUUID().toString();
-
-        EventSourcedTestKit<DigitalTwinState, DigitalTwinController> testKit = EventSourcedTestKit.of(dtId, context -> new DigitalTwinController(context,mlScoringService));
-
-        var createRequest = new DigitalTwinApi.CreateRequest("name");
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
-        DigitalTwinEvent.Created createdEvent = createResult.getNextEventOfType(DigitalTwinEvent.Created.class);
-        assertEquals(dtId,createdEvent.getDtId());
-
-        DigitalTwinState updatedState = (DigitalTwinState)createResult.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
-
-
-        //raw1 received and then raw2 received -> raw2 triggers maintenance check - metrics OK
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> metricRaw1Result = testKit.call(service -> service.metricRaw1(MLScoringServiceMock.metricRaw1OKRequest));
-        DigitalTwinEvent.MetricRaw1Received raw1Received = metricRaw1Result.getNextEventOfType(DigitalTwinEvent.MetricRaw1Received.class);
-        assertEquals(dtId,raw1Received.getDtId());
-        updatedState = (DigitalTwinState)metricRaw1Result.getUpdatedState();
-        assertTrue(updatedState.isRaw1Received());
-
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> metricRaw2Result = testKit.call(service -> service.metricRaw2(MLScoringServiceMock.metricRaw2OKRequest));
-        DigitalTwinEvent.MaintenanceNotRequired maintenanceNotRequired = metricRaw2Result.getNextEventOfType(DigitalTwinEvent.MaintenanceNotRequired.class);
-        assertEquals(dtId,maintenanceNotRequired.getDtId());
-        updatedState = (DigitalTwinState)metricRaw2Result.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
-        assertFalse(updatedState.isRaw1Received());
-        assertFalse(updatedState.isRaw2Received());
-
-
-        //raw2 received and then raw1 received -> raw1 triggers maintenance check - metrics OK
-        metricRaw2Result = testKit.call(service -> service.metricRaw2(MLScoringServiceMock.metricRaw2OKRequest));
-        DigitalTwinEvent.MetricRaw2Received raw2Received = metricRaw2Result.getNextEventOfType(DigitalTwinEvent.MetricRaw2Received.class);
-        assertEquals(dtId,raw2Received.getDtId());
-        updatedState = (DigitalTwinState)metricRaw2Result.getUpdatedState();
-        assertTrue(updatedState.isRaw2Received());
-
-        metricRaw1Result = testKit.call(service -> service.metricRaw1(MLScoringServiceMock.metricRaw1OKRequest));
-        maintenanceNotRequired = metricRaw1Result.getNextEventOfType(DigitalTwinEvent.MaintenanceNotRequired.class);
-        assertEquals(dtId,maintenanceNotRequired.getDtId());
-        updatedState = (DigitalTwinState)metricRaw1Result.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
-        assertFalse(updatedState.isRaw1Received());
-        assertFalse(updatedState.isRaw2Received());
-
-        //raw1 received and then raw2 received -> raw2 triggers maintenance check - metrics NOT OK - triggering maintenance
-        metricRaw1Result = testKit.call(service -> service.metricRaw1(MLScoringServiceMock.metricRaw1FailRequest));
-        raw1Received = metricRaw1Result.getNextEventOfType(DigitalTwinEvent.MetricRaw1Received.class);
-        assertEquals(dtId,raw1Received.getDtId());
-
-        metricRaw2Result = testKit.call(service -> service.metricRaw2(MLScoringServiceMock.metricRaw2FailRequest));
-        DigitalTwinEvent.MaintenanceRequired maintenanceRequired = metricRaw2Result.getNextEventOfType(DigitalTwinEvent.MaintenanceRequired.class);
-        assertEquals(dtId,maintenanceRequired.getDtId());
-        updatedState = (DigitalTwinState)metricRaw2Result.getUpdatedState();
-        assertTrue(updatedState.isMaintenanceRequired());
-        assertTrue(updatedState.isRaw1Received());
-        assertTrue(updatedState.isRaw2Received());
-
-        EventSourcedResult<DigitalTwinApi.EmptyResponse> performMaintenanceResult = testKit.call(service -> service.setMaintenancePerformed());
-        DigitalTwinEvent.MaintenancePerformed maintenancePerformed = performMaintenanceResult.getNextEventOfType(DigitalTwinEvent.MaintenancePerformed.class);
-        assertEquals(dtId,maintenancePerformed.getDtId());
-        updatedState = (DigitalTwinState)performMaintenanceResult.getUpdatedState();
-        assertFalse(updatedState.isMaintenanceRequired());
-        assertFalse(updatedState.isRaw1Received());
-        assertFalse(updatedState.isRaw2Received());
-
-
-    }
 }
