@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
-@Component
+//@Component
 public class MLScoringServiceH20 implements MLScoringService{
 
     private static Logger logger = LoggerFactory.getLogger(MLScoringServiceH20.class);
@@ -22,14 +23,7 @@ public class MLScoringServiceH20 implements MLScoringService{
 
     public MLScoringServiceH20() throws IOException, LicenseException {
         model = MojoPipelineService.loadPipeline(getFile("pipeline.mojo"));
-//        String path = getFile("pipeline.mojo").getPath();
-//        System.out.println("path: "+path);
-//        byte [] data = Files.readAllBytes(Paths.get(path));
-//        System.out.println("mojo: "+data.length);
-//
-//        model = MojoPipelineService.loadPipeline(new ByteArrayReaderBackend(data));
     }
-
 
     private File getFile(String fileName) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
@@ -43,28 +37,22 @@ public class MLScoringServiceH20 implements MLScoringService{
     }
 
     @Override
-    public boolean scoreIfMaintenanceRequired(Double raw1, Double raw2) {
-        double[] rowValues = new double[2];
-        rowValues [0] = raw1;
-        rowValues [1] = raw2;
-        boolean res = score(model,rowValues);
-        logger.info("Scoring {}/{}: {}",raw1,raw2,res);
-        return res;
+    public boolean scoreIfMaintenanceRequired(List<Data> dataList) {
+       return score(model,dataList);
     }
 
-    // score line
-    private boolean score(MojoPipeline model, final double[] rowValues) {
+    private boolean score(MojoPipeline model, final List<Data> dataList) {
 
         // setup mojoFrame
         final MojoFrameBuilder frameBuilder = model.getInputFrameBuilder();
-        final MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
 
-        for (int i=0; i<rowValues.length; i++) {
-            rowBuilder.setValue(model.getInputMeta().getColumnName(i), rowValues[i]+"");
-        }
 
-        // create a row
-        frameBuilder.addRow(rowBuilder);
+        dataList.stream().map(d -> {
+            final MojoRowBuilder rowBuilder = frameBuilder.getMojoRowBuilder();
+            rowBuilder.setValue(model.getInputMeta().getColumnName(0), d.raw1+"");
+            rowBuilder.setValue(model.getInputMeta().getColumnName(1), d.raw2+"");
+            return rowBuilder;
+        }).forEach(rb -> frameBuilder.addRow(rb));
         // Create a frame which can be transformed by MOJO pipeline
         final MojoFrame iframe = frameBuilder.toMojoFrame();
         // Transform input frame by MOJO pipeline
@@ -92,4 +80,6 @@ public class MLScoringServiceH20 implements MLScoringService{
         }
         return pos;
     }
+
+
 }

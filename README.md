@@ -2,7 +2,9 @@
 ## No aggregation
 ```
 curl -XPOST -d '{
-  "name": "12345"
+  "name": "12345",
+  "aggregationLimit": 2,
+  "aggregationTimeWindowSeconds": 20
 }' http://localhost:9000/dt/1/create -H "Content-Type: application/json"
 ```
 ```
