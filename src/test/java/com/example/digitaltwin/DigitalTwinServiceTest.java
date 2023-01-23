@@ -37,7 +37,7 @@ public class DigitalTwinServiceTest {
         EventSourcedResult<DigitalTwinModel.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
         createResult.getNextEventOfType(DigitalTwinModel.CreatedEvent.class);
 
-        DigitalTwinModel.State updatedState = (DigitalTwinModel.State)createResult.getUpdatedState();
+        var updatedState = (DigitalTwinModel.State)createResult.getUpdatedState();
         assertFalse(updatedState.maintenanceRequired);
         assertEquals(0,updatedState.aggregation.size());
 
@@ -46,7 +46,7 @@ public class DigitalTwinServiceTest {
         var metricFailRequest = MLScoringServiceMock.metricFailRequest;
 
         //send first OK metric
-        EventSourcedResult<DigitalTwinModel.EmptyResponse> metricResult = testKit.call(service -> service.metric(metricOKRequest));
+        var metricResult = testKit.call(service -> service.metric(metricOKRequest));
         metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregateEvent.class);
         updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
         assertFalse(updatedState.maintenanceRequired);
@@ -75,7 +75,7 @@ public class DigitalTwinServiceTest {
         assertEquals(0,updatedState.aggregation.size());
 
         //mark maintenance as performed
-        EventSourcedResult<DigitalTwinModel.EmptyResponse> maintenancePerformedResult = testKit.call(service -> service.setMaintenancePerformed());
+        var maintenancePerformedResult = testKit.call(service -> service.setMaintenancePerformed());
         maintenancePerformedResult.getNextEventOfType(DigitalTwinModel.MaintenancePerformedEvent.class);
         updatedState = (DigitalTwinModel.State)maintenancePerformedResult.getUpdatedState();
         assertFalse(updatedState.maintenanceRequired);

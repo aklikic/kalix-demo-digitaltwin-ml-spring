@@ -253,18 +253,4 @@ public interface DigitalTwinModel {
         }
     }
 
-    class Ack implements DigitalTwinModel {
-        public final String note;
-        public Ack(){
-            this.note = "OK";
-        }
-        @JsonCreator
-        public Ack(@JsonProperty("note") String note) {
-            this.note = note;
-        }
-        public static Ack of(){
-            return new Ack();
-        }
-    }
-
 }

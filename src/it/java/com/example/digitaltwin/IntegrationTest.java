@@ -38,7 +38,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         var aggregationTimeWindowSeconds = 10;
 
         //create
-        ResponseEntity<DigitalTwinModel.EmptyResponse> emptyRes =
+        var emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/create")
                 .bodyValue(new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds))
@@ -48,7 +48,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
 
-        DigitalTwinModel.GetResponse getRes =
+        var getRes =
         webClient.get()
                 .uri("/dt/"+dtId)
                 .retrieve()
@@ -171,7 +171,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         var aggregationTimeWindowSeconds = 2;
 
         //create
-        ResponseEntity<DigitalTwinModel.EmptyResponse> emptyRes =
+        var emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/create")
                 .bodyValue(new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds))

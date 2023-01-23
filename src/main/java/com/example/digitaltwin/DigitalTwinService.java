@@ -42,8 +42,8 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
     @PostMapping("/create")
     public Effect<DigitalTwinModel.EmptyResponse> create(@RequestBody DigitalTwinModel.CreateRequest request){
         if(this.currentState().isEmpty()){
-            String nextAggregationId = UUID.randomUUID().toString();
-            DigitalTwinModel.CreatedEvent event =
+            var nextAggregationId = UUID.randomUUID().toString();
+            var event =
                     new DigitalTwinModel.CreatedEvent(
                             dtId,
                             request.name,
@@ -66,17 +66,17 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
             //if maintenanceRequired is triggered all metrics are ignored until maintenance perform is triggered
             return effects().reply(DigitalTwinModel.EmptyResponse.of());
         }else{
-            DigitalTwinModel.MetricAggregateEvent metricAggregateEvent =
+            var metricAggregateEvent =
                     new DigitalTwinModel.MetricAggregateEvent(
                             dtId,
                             currentState().aggregationId,
                             request.raw1,
                             request.raw2,
                             Instant.now());
-            DigitalTwinModel.State tmpNewState = currentState().onMetricAggregateEvent(metricAggregateEvent);
+            var tmpNewState = currentState().onMetricAggregateEvent(metricAggregateEvent);
             if(tmpNewState.isAggregationFinished()) {
                 //if aggregation is finished, trigger ML scoring/serving
-                DigitalTwinModel.AggregationFinishedEvent event = triggerMlScoring(tmpNewState);
+                var event = triggerMlScoring(tmpNewState);
                 return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
             }else{
                 //if aggregation is NOT finished, aggregate
@@ -86,9 +86,9 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
     }
 
     private DigitalTwinModel.AggregationFinishedEvent triggerMlScoring(DigitalTwinModel.State state){
-        List<MLScoringService.Data> dataList = state.aggregation.stream().map(md -> new MLScoringService.Data(md.raw1, md.raw2)).collect(Collectors.toList());
-        boolean maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(dataList);
-        String nextAggregationId = UUID.randomUUID().toString();
+        var dataList = state.aggregation.stream().map(md -> new MLScoringService.Data(md.raw1, md.raw2)).collect(Collectors.toList());
+        var maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(dataList);
+        var nextAggregationId = UUID.randomUUID().toString();
         return new DigitalTwinModel.AggregationFinishedEvent(dtId, currentState().aggregationTimeWindowSeconds, nextAggregationId, maintenanceRequired, Instant.now());
     }
 
@@ -100,7 +100,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
             return effects().reply(DigitalTwinModel.EmptyResponse.of());
         }else if (currentState().isAggregationFinished()){
             //if aggregation is finished, trigger ML scoring/serving
-            DigitalTwinModel.AggregationFinishedEvent event = triggerMlScoring(currentState());
+            var event = triggerMlScoring(currentState());
             return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
         } else {
             return effects().reply(DigitalTwinModel.EmptyResponse.of());
@@ -112,7 +112,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         }else if (currentState().maintenanceRequired){
-            DigitalTwinModel.MaintenancePerformedEvent event = new DigitalTwinModel.MaintenancePerformedEvent(dtId,Instant.now());
+            var event = new DigitalTwinModel.MaintenancePerformedEvent(dtId,Instant.now());
             return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
         } else {
             return effects().reply(DigitalTwinModel.EmptyResponse.of());
