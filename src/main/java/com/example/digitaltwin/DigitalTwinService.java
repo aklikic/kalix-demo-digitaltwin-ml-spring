@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
 
 
     @PostMapping("/create")
-    public Effect<DigitalTwinModel.EmptyResponse> create(@RequestBody DigitalTwinModel.CreateRequest request){
+    public Effect<String> create(@RequestBody DigitalTwinModel.CreateRequest request){
         if(this.currentState().isEmpty()){
             var nextAggregationId = UUID.randomUUID().toString();
             var event =
@@ -51,20 +50,20 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
                             request.aggregationTimeWindowSeconds,
                             nextAggregationId,
                             Instant.now());
-            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
+            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
         } else {
-            return effects().reply(DigitalTwinModel.EmptyResponse.of());
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }
     }
 
     @PostMapping("/metric")
-    public Effect<DigitalTwinModel.EmptyResponse> metric(@RequestBody DigitalTwinModel.MetricRequest request) {
+    public Effect<String> metric(@RequestBody DigitalTwinModel.MetricRequest request) {
         if (currentState().isEmpty()) {
             //if digital twin was not created so not recognized
             return effects().error("Digital twin not created!", Status.Code.NOT_FOUND);
         }else if(currentState().maintenanceRequired){
             //if maintenanceRequired is triggered all metrics are ignored until maintenance perform is triggered
-            return effects().reply(DigitalTwinModel.EmptyResponse.of());
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }else{
             var metricAggregateEvent =
                     new DigitalTwinModel.MetricAggregateEvent(
@@ -77,10 +76,10 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
             if(tmpNewState.isAggregationFinished()) {
                 //if aggregation is finished, trigger ML scoring/serving
                 var event = triggerMlScoring(tmpNewState);
-                return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
+                return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
             }else{
                 //if aggregation is NOT finished, aggregate
-                return effects().emitEvent(metricAggregateEvent).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
+                return effects().emitEvent(metricAggregateEvent).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
             }
         }
     }
@@ -95,27 +94,27 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
 
 
     @PostMapping("/aggregation-time-window-timer-trigger")
-    public Effect<DigitalTwinModel.EmptyResponse> aggregationTimeWindowTimerTrigger(){
+    public Effect<String> aggregationTimeWindowTimerTrigger(@RequestBody DigitalTwinModel.AggregationTimeWindowDoneRequest request){
         if(currentState().isEmpty()){
-            return effects().reply(DigitalTwinModel.EmptyResponse.of());
-        }else if (currentState().isAggregationFinished()){
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
+        }else if (currentState().aggregationId.equals(request.aggregationId) && currentState().isAggregationFinished()){
             //if aggregation is finished, trigger ML scoring/serving
             var event = triggerMlScoring(currentState());
-            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
+            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
         } else {
-            return effects().reply(DigitalTwinModel.EmptyResponse.of());
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }
     }
 
     @PostMapping("/set-maintenance-performed")
-    public Effect<DigitalTwinModel.EmptyResponse> setMaintenancePerformed(){
+    public Effect<String> setMaintenancePerformed(){
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         }else if (currentState().maintenanceRequired){
             var event = new DigitalTwinModel.MaintenancePerformedEvent(dtId,Instant.now());
-            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.EmptyResponse.of());
+            return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
         } else {
-            return effects().reply(DigitalTwinModel.EmptyResponse.of());
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }
     }
 

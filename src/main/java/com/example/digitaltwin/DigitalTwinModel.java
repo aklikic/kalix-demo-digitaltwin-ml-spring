@@ -239,18 +239,5 @@ public interface DigitalTwinModel {
         }
     }
 
-    class EmptyResponse implements DigitalTwinModel {
-        public final String note;
-        public EmptyResponse(){
-            this.note = "OK";
-        }
-        @JsonCreator
-        public EmptyResponse(@JsonProperty("note") String note) {
-            this.note = note;
-        }
-        public static EmptyResponse of(){
-            return new EmptyResponse();
-        }
-    }
-
+    public static String OK_RESPONSE = "OK";
 }

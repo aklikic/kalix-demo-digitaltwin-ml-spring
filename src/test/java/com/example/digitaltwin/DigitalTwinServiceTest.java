@@ -34,7 +34,7 @@ public class DigitalTwinServiceTest {
 
         //create
         var createRequest = new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds);
-        EventSourcedResult<DigitalTwinModel.EmptyResponse> createResult = testKit.call(service -> service.create(createRequest));
+        EventSourcedResult<String> createResult = testKit.call(service -> service.create(createRequest));
         createResult.getNextEventOfType(DigitalTwinModel.CreatedEvent.class);
 
         var updatedState = (DigitalTwinModel.State)createResult.getUpdatedState();

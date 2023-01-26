@@ -20,19 +20,21 @@ public class AggregationTimeWindowTimerAction extends Action {
     private String getTimerName (String dtId){
         return  "TIME-WINDOW-TIMER/" + dtId;
     }
-    private CompletionStage<String> createTimer(String dtId, Integer aggregationTimeWindowSeconds){
-        timers().cancel(getTimerName(dtId));
-        var deferredCall = kalixClient.post("/dt/"+dtId+"/aggregation-time-window-timer-trigger",DigitalTwinModel.EmptyResponse.class);
-        return timers().startSingleTimer(getTimerName(dtId), Duration.of(aggregationTimeWindowSeconds, ChronoUnit.SECONDS),deferredCall)
-                .thenApply(d -> "OK");
+    private CompletionStage<String> createTimer(String dtId, String aggregationId, Integer aggregationTimeWindowSeconds){
+        return timers().cancel(getTimerName(dtId))
+                .thenCompose(done -> {
+                    var deferredCall = kalixClient.post("/dt/"+dtId+"/aggregation-time-window-timer-trigger",new DigitalTwinModel.AggregationTimeWindowDoneRequest(aggregationId),String.class);
+                    return timers().startSingleTimer(getTimerName(dtId), Duration.of(aggregationTimeWindowSeconds, ChronoUnit.SECONDS),deferredCall);
+                })
+                .thenApply(done -> DigitalTwinModel.OK_RESPONSE);
     }
     public Effect<String> onCreatedEvent(DigitalTwinModel.CreatedEvent event){
-        var timerCreate = createTimer(event.dtId, event.aggregationTimeWindowSeconds);
+        var timerCreate = createTimer(event.dtId, event.nextAggregationId, event.aggregationTimeWindowSeconds);
         return effects().asyncReply(timerCreate);
     }
 
     public Effect<String> onAggregationFinishedEvent(DigitalTwinModel.AggregationFinishedEvent event){
-        var timerCreate = createTimer(event.dtId, event.aggregationTimeWindowSeconds);
+        var timerCreate = createTimer(event.dtId, event.nextAggregationId, event.aggregationTimeWindowSeconds);
         return effects().asyncReply(timerCreate);
     }
 

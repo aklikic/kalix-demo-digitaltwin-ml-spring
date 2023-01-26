@@ -43,7 +43,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/create")
                 .bodyValue(new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds))
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -64,7 +64,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/metric")
                 .bodyValue(MLScoringServiceMock.metricOKRequest)
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -85,7 +85,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/metric")
                 .bodyValue(MLScoringServiceMock.metricOKRequest)
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -106,7 +106,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/metric")
                 .bodyValue(MLScoringServiceMock.metricFailRequest)
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -127,7 +127,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/metric")
                 .bodyValue(MLScoringServiceMock.metricFailRequest)
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -147,7 +147,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         webClient.post()
                 .uri("/dt/"+dtId+"/set-maintenance-performed")
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -176,7 +176,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/create")
                 .bodyValue(new DigitalTwinModel.CreateRequest("name",aggregationLimit,aggregationTimeWindowSeconds))
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
@@ -187,7 +187,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
                 .uri("/dt/"+dtId+"/metric")
                 .bodyValue(MLScoringServiceMock.metricFailRequest)
                 .retrieve()
-                .toEntity(DigitalTwinModel.EmptyResponse.class)
+                .toEntity(String.class)
                 .block(timeout);
 
         assertEquals(HttpStatus.OK,emptyRes.getStatusCode());
