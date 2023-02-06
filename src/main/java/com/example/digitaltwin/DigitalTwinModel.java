@@ -12,14 +12,18 @@ import java.time.Instant;
 public interface DigitalTwinModel {
 
     class MetricData implements DigitalTwinModel {
+        public final String requestId;
         public final Double raw1;
         public final Double raw2;
         public final Instant timestamp;
 
         @JsonCreator
-        public MetricData(@JsonProperty Double raw1,
+        public MetricData(
+                          @JsonProperty String requestId,
+                          @JsonProperty Double raw1,
                           @JsonProperty Double raw2,
                           @JsonProperty Instant timestamp) {
+            this.requestId = requestId;
             this.raw1 = raw1;
             this.raw2 = raw2;
             this.timestamp = timestamp;
@@ -60,6 +64,10 @@ public interface DigitalTwinModel {
             return lastUpdated==null;
         }
         @JsonIgnore
+        public boolean isDuplicate(String requestId){
+            return aggregation.stream().filter(a -> a.requestId.equals(requestId)).findFirst().isPresent();
+        }
+        @JsonIgnore
         public boolean isAggregationFinished(){
             if(aggregation.isEmpty())
                 return false;
@@ -74,8 +82,8 @@ public interface DigitalTwinModel {
             return new State(event.name, event.aggregationLimit, event.aggregationTimeWindowSeconds, event.nextAggregationId, ImmutableList.of(), false, event.timestamp);
         }
         @JsonIgnore
-        public State onMetricAggregateEvent(MetricAggregateEvent event){
-            ImmutableList<MetricData> newList = ImmutableList.<MetricData>builder().addAll(this.aggregation).add(new MetricData(event.raw1, event.raw2, event.timestamp)).build();
+        public State onMetricAggregatedEvent(MetricAggregatedEvent event){
+            ImmutableList<MetricData> newList = ImmutableList.<MetricData>builder().addAll(this.aggregation).add(new MetricData(event.requestId, event.raw1, event.raw2, event.timestamp)).build();
             return new State(this.name, this.aggregationLimit, this.aggregationTimeWindowSeconds, event.aggregationId, newList, false, event.timestamp);
         }
         @JsonIgnore
@@ -121,20 +129,23 @@ public interface DigitalTwinModel {
     }
 
     @TypeName("metric_aggregated")
-    class MetricAggregateEvent implements DigitalTwinModel{
+    class MetricAggregatedEvent implements DigitalTwinModel{
         public final String dtId;
         public final String aggregationId;
+        public final String requestId;
         public final Double raw1;
         public final Double raw2;
         public final Instant timestamp;
 
         @JsonCreator
-        public MetricAggregateEvent(@JsonProperty String dtId,
-                                    @JsonProperty String aggregationId,
-                                    @JsonProperty Double raw1,
-                                    @JsonProperty Double raw2,
-                                    @JsonProperty Instant timestamp) {
+        public MetricAggregatedEvent(@JsonProperty String dtId,
+                                     @JsonProperty String aggregationId,
+                                     @JsonProperty String requestId,
+                                     @JsonProperty Double raw1,
+                                     @JsonProperty Double raw2,
+                                     @JsonProperty Instant timestamp) {
             this.dtId = dtId;
+            this.requestId =  requestId;
             this.raw1 = raw1;
             this.raw2 = raw2;
             this.aggregationId = aggregationId;
@@ -167,12 +178,18 @@ public interface DigitalTwinModel {
     @TypeName("maintenance_performed")
     class MaintenancePerformedEvent implements DigitalTwinModel{
         public final String dtId;
+        public final Integer aggregationTimeWindowSeconds;
+        public final String nextAggregationId;
         public final Instant timestamp;
 
         @JsonCreator
         public MaintenancePerformedEvent(@JsonProperty String dtId,
+                                         @JsonProperty Integer aggregationTimeWindowSeconds,
+                                         @JsonProperty String nextAggregationId,
                                          @JsonProperty Instant timestamp) {
             this.dtId = dtId;
+            this.aggregationTimeWindowSeconds = aggregationTimeWindowSeconds;
+            this.nextAggregationId = nextAggregationId;
             this.timestamp = timestamp;
         }
     }
@@ -196,12 +213,15 @@ public interface DigitalTwinModel {
         }
     }
     class MetricRequest implements DigitalTwinModel {
+        public final String requestId;
         public final Double raw1;
         public final Double raw2;
 
         @JsonCreator
-        public MetricRequest(@JsonProperty Double raw1,
+        public MetricRequest(@JsonProperty String requestId,
+                             @JsonProperty Double raw1,
                              @JsonProperty Double raw2) {
+            this.requestId = requestId;
             this.raw1 = raw1;
             this.raw2 = raw2;
         }

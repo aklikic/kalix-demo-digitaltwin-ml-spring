@@ -42,12 +42,12 @@ public class DigitalTwinServiceTest {
         assertEquals(0,updatedState.aggregation.size());
 
 
-        var metricOKRequest = MLScoringServiceMock.metricOKRequest;
-        var metricFailRequest = MLScoringServiceMock.metricFailRequest;
+        var metricOKRequest = MLScoringServiceMock.metricOKRequest();
+        var metricFailRequest = MLScoringServiceMock.metricFailRequest();
 
         //send first OK metric
         var metricResult = testKit.call(service -> service.metric(metricOKRequest));
-        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregateEvent.class);
+        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregatedEvent.class);
         updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
         assertFalse(updatedState.maintenanceRequired);
         assertEquals(1,updatedState.aggregation.size());
@@ -62,7 +62,7 @@ public class DigitalTwinServiceTest {
 
         //send first FAIL metric
         metricResult = testKit.call(service -> service.metric(metricFailRequest));
-        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregateEvent.class);
+        metricResult.getNextEventOfType(DigitalTwinModel.MetricAggregatedEvent.class);
         updatedState = (DigitalTwinModel.State)metricResult.getUpdatedState();
         assertFalse(updatedState.maintenanceRequired);
         assertEquals(1,updatedState.aggregation.size());

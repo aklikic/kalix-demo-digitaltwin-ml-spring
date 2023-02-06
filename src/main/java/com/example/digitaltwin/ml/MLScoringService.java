@@ -14,6 +14,6 @@ public interface MLScoringService {
         }
     }
 
-    boolean scoreIfMaintenanceRequired(List<Data> dataList);
+    boolean scoreAndReturnIfMaintenanceRequired(List<Data> dataList);
 
 }

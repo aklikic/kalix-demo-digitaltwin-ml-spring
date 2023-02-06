@@ -61,18 +61,22 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
         if (currentState().isEmpty()) {
             //if digital twin was not created so not recognized
             return effects().error("Digital twin not created!", Status.Code.NOT_FOUND);
+        }else if(currentState().isDuplicate(request.requestId)){
+            //check duplicate requests
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }else if(currentState().maintenanceRequired){
             //if maintenanceRequired is triggered all metrics are ignored until maintenance perform is triggered
             return effects().reply(DigitalTwinModel.OK_RESPONSE);
         }else{
             var metricAggregateEvent =
-                    new DigitalTwinModel.MetricAggregateEvent(
+                    new DigitalTwinModel.MetricAggregatedEvent(
                             dtId,
                             currentState().aggregationId,
+                            request.requestId,
                             request.raw1,
                             request.raw2,
                             Instant.now());
-            var tmpNewState = currentState().onMetricAggregateEvent(metricAggregateEvent);
+            var tmpNewState = currentState().onMetricAggregatedEvent(metricAggregateEvent);
             if(tmpNewState.isAggregationFinished()) {
                 //if aggregation is finished, trigger ML scoring/serving
                 var event = triggerMlScoring(tmpNewState);
@@ -86,7 +90,7 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
 
     private DigitalTwinModel.AggregationFinishedEvent triggerMlScoring(DigitalTwinModel.State state){
         var dataList = state.aggregation.stream().map(md -> new MLScoringService.Data(md.raw1, md.raw2)).collect(Collectors.toList());
-        var maintenanceRequired = mlScoringService.scoreIfMaintenanceRequired(dataList);
+        var maintenanceRequired = mlScoringService.scoreAndReturnIfMaintenanceRequired(dataList);
         var nextAggregationId = UUID.randomUUID().toString();
         return new DigitalTwinModel.AggregationFinishedEvent(dtId, currentState().aggregationTimeWindowSeconds, nextAggregationId, maintenanceRequired, Instant.now());
     }
@@ -111,7 +115,8 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
         if(currentState().isEmpty()){
             return effects().error("Not found", Status.Code.NOT_FOUND);
         }else if (currentState().maintenanceRequired){
-            var event = new DigitalTwinModel.MaintenancePerformedEvent(dtId,Instant.now());
+            var nextAggregationId = UUID.randomUUID().toString();
+            var event = new DigitalTwinModel.MaintenancePerformedEvent(dtId, currentState().aggregationTimeWindowSeconds, nextAggregationId, Instant.now());
             return effects().emitEvent(event).thenReply(newState -> DigitalTwinModel.OK_RESPONSE);
         } else {
             return effects().reply(DigitalTwinModel.OK_RESPONSE);
@@ -132,8 +137,8 @@ public class DigitalTwinService extends EventSourcedEntity<DigitalTwinModel.Stat
         return this.currentState().onCreatedEvent(event);
     }
     @EventHandler
-    public DigitalTwinModel.State onMetricAggregateEvent (DigitalTwinModel.MetricAggregateEvent event){
-        return this.currentState().onMetricAggregateEvent(event);
+    public DigitalTwinModel.State onMetricAggregateEvent (DigitalTwinModel.MetricAggregatedEvent event){
+        return this.currentState().onMetricAggregatedEvent(event);
     }
     @EventHandler
     public DigitalTwinModel.State onAggregationFinishedEvent (DigitalTwinModel.AggregationFinishedEvent event){

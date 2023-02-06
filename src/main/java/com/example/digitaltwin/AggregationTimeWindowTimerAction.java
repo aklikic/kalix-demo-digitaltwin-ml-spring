@@ -34,6 +34,15 @@ public class AggregationTimeWindowTimerAction extends Action {
     }
 
     public Effect<String> onAggregationFinishedEvent(DigitalTwinModel.AggregationFinishedEvent event){
+        if(!event.maintenanceRequired) {
+            var timerCreate = createTimer(event.dtId, event.nextAggregationId, event.aggregationTimeWindowSeconds);
+            return effects().asyncReply(timerCreate);
+        } else {
+            return effects().reply(DigitalTwinModel.OK_RESPONSE);
+        }
+    }
+
+    public Effect<String> onAggregationFinishedEvent(DigitalTwinModel.MaintenancePerformedEvent event){
         var timerCreate = createTimer(event.dtId, event.nextAggregationId, event.aggregationTimeWindowSeconds);
         return effects().asyncReply(timerCreate);
     }

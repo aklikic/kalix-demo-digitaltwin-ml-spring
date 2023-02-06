@@ -14,8 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.stream.IntStream;
 
-//@Component
+@Component
 public class MLScoringServiceH20 implements MLScoringService{
 
     private static Logger logger = LoggerFactory.getLogger(MLScoringServiceH20.class);
@@ -37,7 +38,7 @@ public class MLScoringServiceH20 implements MLScoringService{
     }
 
     @Override
-    public boolean scoreIfMaintenanceRequired(List<Data> dataList) {
+    public boolean scoreAndReturnIfMaintenanceRequired(List<Data> dataList) {
        return score(model,dataList);
     }
 
@@ -58,28 +59,10 @@ public class MLScoringServiceH20 implements MLScoringService{
         // Transform input frame by MOJO pipeline
         final MojoFrame oframe = model.transform(iframe);
 
-        // display predicted class
-        double[] output = new double[2];
-        output[0] = Double.parseDouble(oframe.getColumn(0).getDataAsStrings()[0]);
-        output[1] = Double.parseDouble(oframe.getColumn(1).getDataAsStrings()[0]);
+        var resColumn0 = Double.parseDouble(oframe.getColumn(0).getDataAsStrings()[0]);
+        var resColumn1 = Double.parseDouble(oframe.getColumn(1).getDataAsStrings()[0]);
 
-        int index = argMax(output);
-
-        return index != 0;
+        return resColumn1 > resColumn0;
     }
-
-    // argmax function to return the predicted class based on predicted probabilities
-    private static int argMax(final double[] values) {
-        double curr_max = Double.NEGATIVE_INFINITY;
-        int pos = 0;
-        for (int i=0; i<values.length; i++) {
-            if (values[i] > curr_max) {
-                curr_max = values[i];
-                pos = i;
-            }
-        }
-        return pos;
-    }
-
 
 }

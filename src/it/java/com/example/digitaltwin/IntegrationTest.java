@@ -62,7 +62,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/metric")
-                .bodyValue(MLScoringServiceMock.metricOKRequest)
+                .bodyValue(MLScoringServiceMock.metricOKRequest())
                 .retrieve()
                 .toEntity(String.class)
                 .block(timeout);
@@ -83,7 +83,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/metric")
-                .bodyValue(MLScoringServiceMock.metricOKRequest)
+                .bodyValue(MLScoringServiceMock.metricOKRequest())
                 .retrieve()
                 .toEntity(String.class)
                 .block(timeout);
@@ -104,7 +104,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/metric")
-                .bodyValue(MLScoringServiceMock.metricFailRequest)
+                .bodyValue(MLScoringServiceMock.metricFailRequest())
                 .retrieve()
                 .toEntity(String.class)
                 .block(timeout);
@@ -125,7 +125,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/metric")
-                .bodyValue(MLScoringServiceMock.metricFailRequest)
+                .bodyValue(MLScoringServiceMock.metricFailRequest())
                 .retrieve()
                 .toEntity(String.class)
                 .block(timeout);
@@ -185,7 +185,7 @@ public class IntegrationTest extends KalixIntegrationTestKitSupport {
         emptyRes =
         webClient.post()
                 .uri("/dt/"+dtId+"/metric")
-                .bodyValue(MLScoringServiceMock.metricFailRequest)
+                .bodyValue(MLScoringServiceMock.metricFailRequest())
                 .retrieve()
                 .toEntity(String.class)
                 .block(timeout);
